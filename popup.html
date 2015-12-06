@@ -1,13 +1,82 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<script src="jquery-2.1.4.min.js"></script>
 		<style>
-			body {width: 200px;}
+			body {
+				width: 300px; margin: 0px;
+				font-family: "Trebuchet MS","Futura","Tahoma","Century Gothic",sans-serif;
+				font-size: 10pt;
+			}
 			img {height: 12px;}
 			.good { color: #080;}
+
+			#statusbar {
+				background-color: #888888;
+				color: white;
+				padding: 5px;
+				font-size: 12pt;
+			}
+
+			input[type='radio'] {
+				display: none; 
+			}
+
+			label {
+				display: inline-block;
+				padding: 5px;
+			}
+
+			.unselectable {
+			    -webkit-touch-callout: none;
+			    -webkit-user-select: none;
+			    -khtml-user-select: none;
+			    -moz-user-select: none;
+			    -ms-user-select: none;
+			    user-select: none;
+			}
+
+
+			input[type="radio"] {
+			    display:none;
+			}
+			input[type="radio"] + label span {
+			    display:inline-block;
+			    width:19px;
+			    height:19px;
+			    margin:-1px 4px 0 0;
+			    vertical-align:middle;
+			    background:url(check_radio_sheet.png) -38px top no-repeat;
+			    cursor:pointer;
+			}
+			input[type="radio"]:checked + label span {
+			    background:url(check_radio_sheet.png) -57px top no-repeat;
+			}
 		</style>
 	</head>
-	<body>
-		<a id="link" onclick="toggle();" class="good" href="">Enabled on this page <img id="symbol" src="check.png"/></a>
+	<body class="unselectable">
+		<div id="statusbar" class="unselectable">PageAge is enabled</div>
+
+		<input type="radio" id="renabled" name="state" value="enabled" checked/>
+		<label for="renabled" class="unselectable"><span></span>Enabled</label><br />
+
+		<input type="radio" id="rtemp" name="state" value="temp"/>
+		<label for="rtemp" class="unselectable"><span></span>Disabled for this page instance (temporary)</label><br />
+
+		<input type="radio" id="rtab" name="state" value="tab"/>
+		<label for="rtab" class="unselectable"><span></span>Disabled for this tab</label><br />
+
+		<hr />
+
+		<input type="radio" id="rpage" name="state" value="page"/>
+		<label for="rpage" class="unselectable"><span></span>Disabled for this page</label><br />
+
+		<input type="radio" id="rsite" name="state" value="site"/>
+		<label for="rsite" class="unselectable"><span></span>Disabled for this site</label>
+
+		<hr />
+
+		<label id="settings" class="unselectable">Settings</label>
+		<script src="popup.js"></script>
 	</body>
 </html>

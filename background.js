@@ -117,6 +117,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, callback){
 	return true;
 });
 
+/*
 chrome.browserAction.onClicked.addListener(function(tab){
 	chrome.browserAction.getBadgeText({tabId: tab.id},function(txt){
 		if (txt){
@@ -129,3 +130,4 @@ chrome.browserAction.onClicked.addListener(function(tab){
 	});
 	
 });
+*/

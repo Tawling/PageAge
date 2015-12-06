@@ -20,6 +20,7 @@
 
 	"browser_action": {
 		"default:icon": {"128":"pageage_128.png"},
-		"default_title": "Toggle PageAge on this page"
+		"default_title": "Toggle PageAge on this page",
+		"default_popup": "popup.html"
 	}
 }
