@@ -108,23 +108,20 @@ chrome.runtime.onMessage.addListener(function(request, sender, callback){
 	if (request.message === "icon"){
 		getFavicon(request,sender,callback);
 	}else if (request.message === "load"){
-		console.log("lode");
 		getTabState(sender.tab, function(state){
 			console.log("load state: " + state);
-			if (state === "enabled"){
+			if (state === "enabled" || state === "temp"){
+				sessionStorage.setItem("PageAge+"+sender.tab.id,"enabled");
 				callback(true);
 			}
 		})
 	}else if (request.message === "popup-select") {
 		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-			console.log(tabs);
 		    // since only one tab should be active and in the current window at once
 		    // the return variable should only have one entry
 		    var tab = tabs[0];
 		    var newstate = request.state;
-		    console.log(newstate);
 			getTabState(tab, function(state){
-				console.log(state);
 				if (state === "page"){
 					callback(true);
 				}
@@ -161,7 +158,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, callback){
 	}
 	else if(request.message === "popup-load"){
 		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-			console.log(tabs);
 		    var tab = tabs[0];
 			getTabState(tab, function(state){
 				callback(state);
@@ -172,37 +168,33 @@ chrome.runtime.onMessage.addListener(function(request, sender, callback){
 });
 
 function getTabState(tab, callback){
-	console.log("getTabState");
-	console.log(tab);
 	chrome.storage.sync.get({
 		exceptions: []
 	},function(items){
+		var ss = tab.id ? sessionStorage.getItem("PageAge+"+tab.id) : null;
 		if (tab.url){
 			var re, pat;
 			for(pat of items.exceptions){
 				try{
 					re = patternToRegExp(pat);
 					if (re.test(tab.url)){
-						console.log("match=page");
-						callback("page");
+						if (ss === "tab" || ss === "temp" || ss === "enabled-temp"){
+							callback(ss,"page")
+						}else{
+							callback("page");
+						}
 						return;
 					}
 				}catch(e){
 					//do nothing for now
-					console.log(e);
+					console.error(e);
 				}
 			}
 		}
-		if (tab.id){
-			console.log(sessionStorage.length);
-			var ss = sessionStorage.getItem("PageAge+"+tab.id);
-			if (ss === "temp" || ss === "tab" || ss === "enabled" || ss === "enabled-temp"){
-				console.log("ss="+ss)
-				callback(ss);
-				return;
-			}
+		if (ss === "temp" || ss === "tab" || ss === "enabled" || ss === "enabled-temp"){
+			callback(ss);
+			return;
 		}
-		console.log("default=enabled");
 		callback("enabled");
 	})
 }
