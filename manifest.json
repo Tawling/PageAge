@@ -1,0 +1,25 @@
+{
+	"manifest_version": 2,
+	"name": "PageAge",
+	"version": "0.1",
+	"content_scripts": [
+		{
+			"matches": [
+				"<all_urls>"
+			],
+			"js": ["jquery-2.1.4.min.js","content.js"],
+			"run_at": "document_idle"
+		}
+	],
+	"background": {
+		"scripts":["background.js"]
+	},
+	"permissions": ["chrome://favicon/", "storage"],
+	"options_page": "options.html",
+	"icons":{"128":"pageage_128.png"},
+
+	"browser_action": {
+		"default:icon": {"128":"pageage_128.png"},
+		"default_title": "Toggle PageAge on this page"
+	}
+}
