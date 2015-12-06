@@ -140,11 +140,11 @@ $(document).ready(function(){
 
 function restore_options(){
 	chrome.storage.sync.get({entries: [
-	{stroke: {r:0, g:0, b:0, a:1}, fill: {r:0, g:0, b:0, a:1}, d: 0, h: 0, m: 0, s: 5},
-	{stroke: {r:255, g:0, b:0, a:1}, fill: {r:255, g:0, b:0, a:1}, d: 0, h: 0, m: 0, s: 10},
-	{stroke: {r:0, g:0, b:255, a:1}, fill: {r:0, g:0, b:255, a:1}, d: 0, h: 0, m: 0, s: 30},
-	{stroke: {r:0, g:0, b:255, a:0}, fill: {r:0, g:0, b:255, a:0}, d: 0, h: 0, m: 5, s: 0}
-]},function(items){
+		{stroke: {r:0, g:0, b:0, a:1}, fill: {r:0, g:0, b:0, a:1}, d: 0, h: 0, m: 0, s: 5},
+		{stroke: {r:255, g:0, b:0, a:1}, fill: {r:255, g:0, b:0, a:1}, d: 0, h: 0, m: 0, s: 10},
+		{stroke: {r:0, g:0, b:255, a:1}, fill: {r:0, g:0, b:255, a:1}, d: 0, h: 0, m: 0, s: 30},
+		{stroke: {r:0, g:0, b:255, a:0}, fill: {r:0, g:0, b:255, a:0}, d: 0, h: 0, m: 5, s: 0}
+	]}, function(items){
 		for(var i = 0; i < items.entries.length; i++){
 			var e = addEntry(items.entries[i]);
 			target = $(e).find(".fill");
@@ -155,7 +155,7 @@ function restore_options(){
 			recolor();
 		}
 		target = null;
-	})
+	});
 }
 
 function save_options(){

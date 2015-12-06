@@ -107,27 +107,140 @@ function convertTime(entry){
 chrome.runtime.onMessage.addListener(function(request, sender, callback){
 	if (request.message === "icon"){
 		getFavicon(request,sender,callback);
-	}else if(request.message === "load"){
-		chrome.browserAction.getBadgeText({tabId: sender.tab.id},function(txt){
-		if (!txt){
-			callback(true);
-		}
-	});
+	}else if (request.message === "load"){
+		console.log("lode");
+		getTabState(sender.tab, function(state){
+			console.log("load state: " + state);
+			if (state === "enabled"){
+				callback(true);
+			}
+		})
+	}else if (request.message === "popup-select") {
+		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+			console.log(tabs);
+		    // since only one tab should be active and in the current window at once
+		    // the return variable should only have one entry
+		    var tab = tabs[0];
+		    var newstate = request.state;
+		    console.log(newstate);
+			getTabState(tab, function(state){
+				console.log(state);
+				if (state === "page"){
+					callback(true);
+				}
+				switch(newstate){
+					case "enabled":
+						chrome.tabs.sendMessage(tab.id,{message:"enable"},function(){console.log("enabled");});
+						if (state ==="page"){
+							//ONLY ENABLE TEMPORARILY
+							sessionStorage.setItem("PageAge+"+tab.id,"enabled-temp");
+							callback("enabled-temp")
+						}
+						else {
+							sessionStorage.setItem("PageAge+"+tab.id,"enabled");
+							callback("enabled");
+						}
+						break;
+					case "temp":
+						sessionStorage.setItem("PageAge+"+tab.id,"temp");
+						chrome.tabs.sendMessage(tab.id,{message:"disable"},function(){console.log("temp disabled");});
+						callback("temp");
+						break;
+					case "tab":
+						sessionStorage.setItem("PageAge+"+tab.id,"tab");
+						chrome.tabs.sendMessage(tab.id,{message:"disable"},function(){console.log("tab disabled");});
+						callback("tab");
+						break;
+					case "page":
+						chrome.tabs.sendMessage(tab.id,{message:"disable"},function(){console.log("pagedisabled");});
+						callback("page");
+						break;
+				}
+			})
+		});
+	}
+	else if(request.message === "popup-load"){
+		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+			console.log(tabs);
+		    var tab = tabs[0];
+			getTabState(tab, function(state){
+				callback(state);
+			});
+		});
 	}
 	return true;
 });
 
-/*
-chrome.browserAction.onClicked.addListener(function(tab){
-	chrome.browserAction.getBadgeText({tabId: tab.id},function(txt){
-		if (txt){
-			chrome.browserAction.setBadgeText({text:"",tabId:tab.id});
-			chrome.tabs.sendMessage(tab.id,{message:"enable"},function(){console.log("enabled");});
-		}else {
-			chrome.browserAction.setBadgeText({text:"X",tabId:tab.id});
-			chrome.tabs.sendMessage(tab.id,{message:"disable"},function(){console.log("disabled");});
+function getTabState(tab, callback){
+	console.log("getTabState");
+	console.log(tab);
+	chrome.storage.sync.get({
+		exceptions: []
+	},function(items){
+		if (tab.url){
+			var re, pat;
+			for(pat of items.exceptions){
+				try{
+					re = patternToRegExp(pat);
+					if (re.test(tab.url)){
+						console.log("match=page");
+						callback("page");
+						return;
+					}
+				}catch(e){
+					//do nothing for now
+					console.log(e);
+				}
+			}
 		}
-	});
-	
-});
-*/
+		if (tab.id){
+			console.log(sessionStorage.length);
+			var ss = sessionStorage.getItem("PageAge+"+tab.id);
+			if (ss === "temp" || ss === "tab" || ss === "enabled" || ss === "enabled-temp"){
+				console.log("ss="+ss)
+				callback(ss);
+				return;
+			}
+		}
+		console.log("default=enabled");
+		callback("enabled");
+	})
+}
+
+
+function patternToRegExp(pattern){
+  if(pattern == "<all_urls>") return /^(?:http|https|file|ftp):\/\/.*/;
+
+  var split = /^(\*|http|https|file|ftp):\/\/(.*)$/.exec(pattern);
+  if(!split) throw Error("Invalid schema in " + pattern);
+  var schema = split[1];
+  var fullpath = split[2];
+
+  var split = /^([^\/]*)\/(.*)$/.exec(fullpath);
+  if(!split) throw Error("No path specified in " + pattern);
+  var host = split[1];
+  var path = split[2];
+
+  // File 
+  if(schema == "file" && host != "")
+    throw Error("Non-empty host for file schema in " + pattern);
+
+  if(schema != "file" && host == "")
+    throw Error("No host specified in " + pattern);  
+
+  if(!(/^(\*|\*\.[^*]+|[^*]*)$/.exec(host)))
+    throw Error("Illegal wildcard in host in " + pattern);
+
+  var reString = "^";
+  reString += (schema == "*") ? "https*" : schema;
+  reString += ":\\/\\/";
+  // Not overly concerned with intricacies
+  //   of domain name restrictions and IDN
+  //   as we're not testing domain validity
+  reString += host.replace(/\*\.?/, "[^\\/]*");
+  reString += "\\/";
+  reString += path.replace("*", ".*");
+  reString += "$";
+
+  return RegExp(reString);
+}
