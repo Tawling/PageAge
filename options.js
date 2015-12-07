@@ -179,18 +179,18 @@ function save_options(){
 				r: parseInt($(fill).find(".r").val()),
 				g: parseInt($(fill).find(".g").val()),
 				b: parseInt($(fill).find(".b").val()),
-				a: parseInt($(fill).find(".a").val())
+				a: parseFloat($(fill).find(".a").val())
 			},
 			stroke: {
 				r: parseInt($(stroke).find(".r").val()),
 				g: parseInt($(stroke).find(".g").val()),
 				b: parseInt($(stroke).find(".b").val()),
-				a: parseInt($(stroke).find(".a").val())
+				a: parseFloat($(stroke).find(".a").val())
 			},
-			d: parseInt($(entry).find(".d").val()),
-			h: parseInt($(entry).find(".h").val()),
-			m: parseInt($(entry).find(".m").val()),
-			s: parseInt($(entry).find(".s").val())
+			d: parseFloat($(entry).find(".d").val()),
+			h: parseFloat($(entry).find(".h").val()),
+			m: parseFloat($(entry).find(".m").val()),
+			s: parseFloat($(entry).find(".s").val())
 		}
 		entries.push(data);
 	});
