@@ -15,15 +15,26 @@ function getFavicon(request, sender, callback) {
 	    var failed = false;
 	    function onImageLoaded() {
 	    	var canvas = document.createElement("canvas");
-	    	canvas.width = img.width;
-	    	canvas.height = img.height;
+	    	canvas.width = 16;//img.width;
+	    	canvas.height = 16;//img.height;
 	    	var context = canvas.getContext("2d");
 	    	context.translate(0.5,0.5);
 			context.fillStyle=state.fill;
 			context.strokeStyle=state.stroke;
-			context.fillRect(0,0,img.width-1,img.height-1);
-	    	context.drawImage(img, -0.5, -0.5);
-	    	context.strokeRect(0, 0, img.width-1,img.height-1);
+			context.fillRect(0,0,15,15);
+
+			var targetHeight, ratio = img.width / img.height;
+			var targetWidth = targetHeight = Math.min(16,Math.max(img.width, img.height));
+
+			if (ratio < 1){
+				targetWidth = targetHeight * ratio;
+			} else {
+				targetHeight = targetWidth / ratio;
+			}
+
+	    	context.drawImage(img, 7.5 - targetWidth/2, 7.5 - targetHeight/2, targetWidth, targetHeight);
+	    	context.strokeRect(0, 0, 15, 15);
+
 	    	try{
 	    		callback({data: canvas.toDataURL(), delay: getDelay(state.time)});
 	    	}catch(e){
@@ -37,8 +48,15 @@ function getFavicon(request, sender, callback) {
 	    		img.src=faviconUrl; //try using chrome's cached url
 	    	}
 	    };
+	    function onError(){
+	    	if (!err){
+	    		img.src=faviconUrl;
+	    		err = true;
+	    	}
+	    }
 	    var img = document.createElement("img");
 	    img.addEventListener("load", onImageLoaded);
+	    img.addEventListener("error",onError);
 	    img.src = request.iconurl;
 	});
     
@@ -117,8 +135,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, callback){
 		})
 	}else if (request.message === "popup-select") {
 		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-		    // since only one tab should be active and in the current window at once
-		    // the return variable should only have one entry
 		    var tab = tabs[0];
 		    var newstate = request.state;
 			getTabState(tab, function(state){
@@ -164,8 +180,26 @@ chrome.runtime.onMessage.addListener(function(request, sender, callback){
 			});
 		});
 	}
+	else if (request.message === "filter-add") {
+		chrome.storage.sync.get({
+			exceptions: []
+		},function(items){
+			if (items.exceptions.indexOf(message.filter) === -1) {
+				items.exceptions.push(message.filter);
+				chrome.storage.sync.set({
+					exceptions:items.exceptions
+				},function(){
+					callback(true);
+				});
+			}else {
+				callback(false);
+			}
+		});
+	}
 	return true;
 });
+
+
 
 function getTabState(tab, callback){
 	chrome.storage.sync.get({

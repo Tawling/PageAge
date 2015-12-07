@@ -25,33 +25,33 @@ function checkChange(){
 }
 
 function updateState(state, pageFlag){
-	if (pageFlag){ //if the page is techincally found in the list of updated stuff...
+	if (pageFlag){ //if the page is techincally found in the list of excepted stuff...
 		//show that the current page is in the disabled list
 		//dotted background or something. I dunno.
 	}
 	switch(state){
 		case "enabled-temp":
-			$("#statusbar").text("PageAge is enabled (temporarily)");
+			$("#statustext").text("PageAge is enabled (temporarily)");
 			$("#statusbar").css({"background-color":"#336600"});
 			$("#renabled").prop("checked",true);
 			break;
 		case "enabled":
-			$("#statusbar").text("PageAge is enabled");
+			$("#statustext").text("PageAge is enabled");
 			$("#statusbar").css({"background-color":"#336600"});
 			$("#renabled").prop("checked",true);
 			break;
 		case "temp":
-			$("#statusbar").text("PageAge is disabled for this instance");
+			$("#statustext").text("PageAge is disabled for this instance");
 			$("#statusbar").css({"background-color":"#808080"});
 			$("#rtemp").prop("checked",true);
 			break;
 		case "tab":
-			$("#statusbar").text("PageAge is disabled for this tab");
+			$("#statustext").text("PageAge is disabled for this tab");
 			$("#statusbar").css({"background-color":"#0066cc"});
 			$("#rtab").prop("checked",true);
 			break;
 		case "page":
-			$("#statusbar").text("PageAge is disabled for this page");
+			$("#statustext").text("PageAge is disabled for this site");
 			$("#statusbar").css({"background-color":"#cc9900"});
 			$("#rpage").prop("checked",true);
 			break;

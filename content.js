@@ -1,3 +1,4 @@
+(function(){
 if (!$("link[rel~='icon'").length){
 	link = document.createElement("link");
 	link.setAttribute("rel", "icon");
@@ -50,3 +51,4 @@ function getBaseURL () {
    return location.protocol + "//" + location.hostname + 
       (location.port && ":" + location.port) + "/";
 }
+}())
