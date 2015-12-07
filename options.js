@@ -1,21 +1,5 @@
 var target = null;
 
-function updateValues(){
-	$("#redspan").text($("#red").val());
-	$("#greenspan").text($("#green").val());
-	$("#bluespan").text($("#blue").val());
-	$("#alphaspan").text($("#alpha").val());
-
-	if (target){
-		$(target).find(".r").val($("#red").val());
-		$(target).find(".g").val($("#green").val());
-		$(target).find(".b").val($("#blue").val());
-		$(target).find(".a").val($("#alpha").val());
-	}
-
-	recolor();
-}
-
 $("#red").on('input',function(){
 	updateValues()
 });
@@ -41,6 +25,27 @@ $(document).click(function(){
 	$("#picker").hide();
 });
 
+$(document).ready(function(){
+	$( "#entries" ).sortable();
+    $( "#entries" ).disableSelection();
+})
+
+function updateValues(){
+	$("#redspan").text($("#red").val());
+	$("#greenspan").text($("#green").val());
+	$("#bluespan").text($("#blue").val());
+	$("#alphaspan").text($("#alpha").val());
+
+	if (target){
+		$(target).find(".r").val($("#red").val());
+		$(target).find(".g").val($("#green").val());
+		$(target).find(".b").val($("#blue").val());
+		$(target).find(".a").val($("#alpha").val());
+	}
+
+	recolor();
+}
+
 function recolor(){
 	if (target){
 		var r = $(target).find(".r").val();
@@ -61,39 +66,45 @@ function loadColor(){
 }
 
 function addEntry(data){
-	var entry = document.createElement("div");
+	var entry = document.createElement("li");
 	entry.className = "entry";
-	$(entry).append('<div class="delbtn">X</div>\
-				<div class="entry_top">\
-					<p>\
-						Fill:\
-					</p>\
-					<div class="color fill">\
-						<div class="alphabg"></div>\
-						<div class="incolor"></div>\
-						<input class="r" type="hidden" value="255" />\
-						<input class="g" type="hidden" value="0" />\
-						<input class="b" type="hidden" value="0" />\
-						<input class="a" type="hidden" value="1" />\
-					</div>\
-					<p>\
-						Stroke: \
-					</p>\
-					<div class="color stroke">\
-						<div class="alphabg"></div>\
-						<div class="incolor"></div>\
-						<input class="r" type="hidden" value="255" />\
-						<input class="g" type="hidden" value="0" />\
-						<input class="b" type="hidden" value="0" />\
-						<input class="a" type="hidden" value="1" />\
-					</div>\
-				</div>\
-				<div class="time">\
-					<input class="d" type="number" max="99" min="0" step="1" value="0" size="2" /> d\
-					<input class="h" type="number" max="24" min="0" step="1" value="0" size="2" /> h\
-					<input class="m" type="number" max="60" min="0" step="1" value="5" size="2" /> m\
-					<input class="s" type="number" max="60" min="0" step="1" value="0" size="2" /> s\
-				</div>');
+	$(entry).append('<table>\
+						<tr>\
+							<td class="delbtn">X</td>\
+							<td>\
+								<div class="entry_top">\
+									<p>\
+										Fill:\
+									</p>\
+									<div class="color fill">\
+										<div class="alphabg"></div>\
+										<div class="incolor"></div>\
+										<input class="r" type="hidden" value="255" />\
+										<input class="g" type="hidden" value="0" />\
+										<input class="b" type="hidden" value="0" />\
+										<input class="a" type="hidden" value="1" />\
+									</div>\
+									<p>\
+										Stroke: \
+									</p>\
+									<div class="color stroke">\
+										<div class="alphabg"></div>\
+										<div class="incolor"></div>\
+										<input class="r" type="hidden" value="255" />\
+										<input class="g" type="hidden" value="0" />\
+										<input class="b" type="hidden" value="0" />\
+										<input class="a" type="hidden" value="1" />\
+									</div>\
+								</div>\
+								<div class="time">\
+									<input class="d" type="number" max="99" min="0" step="1" value="0" size="2" /> d\
+									<input class="h" type="number" max="24" min="0" step="1" value="0" size="2" /> h\
+									<input class="m" type="number" max="60" min="0" step="1" value="5" size="2" /> m\
+									<input class="s" type="number" max="60" min="0" step="1" value="0" size="2" /> s\
+								</div>\
+							</td>\
+					</tr>\
+				</table>');
 	$(entry).find(".color").click(colorClick);
 	$(entry).find(".delbtn").click(deleteClick);
 	if (data){
