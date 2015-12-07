@@ -1,3 +1,8 @@
+*  {
+	font-family: "Tahoma";
+	margin: 0px;
+	padding: 0px; 
+}
 body {
 	background-color: #dddddd;
 }
@@ -7,6 +12,16 @@ ul {
 li {
 	list-style-type: none;
 }
+#header {
+	background-color: #336600;
+}
+	#header p {
+		margin-left: 75px;
+		padding-top: 20px;
+		padding-bottom: 20px;
+		font-size: 20px;
+		color: white;
+	}
 #picker {
 	display: none;
 	position: absolute;
