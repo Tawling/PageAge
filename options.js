@@ -139,7 +139,7 @@ function colorClick(){
 
 function deleteClick(){
 	console.log($(this).parent);
-	$(this).parent().remove();
+	$(this).parent().parent().parent().parent().remove();
 }
 $("#add").click(function(){addEntry()});
 
