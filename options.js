@@ -1,5 +1,33 @@
 var target = null;
 
+$("#delfilter").click(function(){
+	if ($("#filters li.selected label").length > 0){
+		deleteFilter($("#filters li.selected label").text(),function(){
+			refreshFilters();
+		});
+	}
+});
+
+$("#addfilter").click(function(){
+	if ((""+$("#filtertxt").val()).trim()){
+		addFilter((""+$("#filtertxt").val()).trim(),function(success){
+			if (!success){
+				$("#alreadyadded").show();
+				$("#alreadyadded").fadeOut(2000);
+			}
+			else {
+				$("#filtertxt").val("");
+			}
+			refreshFilters();
+		});
+	}
+})
+
+$("#filters li").click(function(){
+	$("#filters li").removeClass("selected");
+	$(this).addClass("selected");
+});
+
 $("#red").on('input',function(){
 	updateValues()
 });
@@ -18,17 +46,28 @@ $(".color").click(colorClick);
 $("#picker").click(function(){
 	event.stopPropagation();
 	return false;
-})
+});
 
 $(document).click(function(){
 	target = null;
 	$("#picker").hide();
+	if ($("#filters li.selected").length === 0) {
+		$("#delfilter").attr("disabled",true);
+	}else{
+		$("#delfilter").removeAttr("disabled");
+	}
 });
 
 $(document).ready(function(){
 	$( "#entries" ).sortable();
     $( "#entries" ).disableSelection();
-})
+    if ($("#filters li.selected").length === 0) {
+		$("#delfilter").attr("disabled",true);
+	}else{
+		$("#delfilter").removeAttr("disabled");
+	}
+	refreshFilters();
+});
 
 function updateValues(){
 	$("#redspan").text($("#red").val());
@@ -195,9 +234,104 @@ function save_options(){
 		entries.push(data);
 	});
 
+	//do the same for filters
+
 	chrome.storage.sync.set({
 		entries: entries
 	}, function() {
 		alert("saved");
 	});
+}
+
+
+function addFilter(filter,callback){
+	//callback true if added properly
+	//callback false if filter already exists
+	chrome.storage.sync.get({
+		exceptions: []
+	},function(items){
+		if (items.exceptions.indexOf(filter) === -1) {
+			items.exceptions.push(filter);
+			chrome.storage.sync.set({
+				exceptions:items.exceptions
+			},function(){
+				callback(true);
+			});
+		}else {
+			callback(false);
+		}
+	});
+}
+
+function deleteFilter(filter,callback){
+	//callback true if deleted properly
+	//callback false if filter didn't exist
+	chrome.storage.sync.get({
+		exceptions: []
+	},function(items){
+		if (items.exceptions.indexOf(filter) > -1) {
+			items.exceptions.splice(items.exceptions.indexOf(filter),1);
+			chrome.storage.sync.set({
+				exceptions:items.exceptions
+			},function(){
+				callback(true);
+			});
+		}else {
+			callback(false);
+		}
+	});
+}
+
+function refreshFilters(){
+	$("#filters").empty();
+	chrome.storage.sync.get({
+		exceptions: []
+	},function(items){
+		for (var i of items.exceptions){
+			var li = document.createElement("li");
+			$(li).click(function(){
+				$("#filters li").removeClass("selected");
+				$(this).addClass("selected");
+			});
+			$(li).append("<label>"+i+"</label>");
+			$("#filters").append(li);
+		}
+	});
+}
+
+function patternToRegExp(pattern){
+  if(pattern == "<all_urls>") return /^(?:http|https|file|ftp):\/\/.*/;
+
+  var split = /^(\*|http|https|file|ftp):\/\/(.*)$/.exec(pattern);
+  if(!split) throw Error("Invalid schema in " + pattern);
+  var schema = split[1];
+  var fullpath = split[2];
+
+  var split = /^([^\/]*)\/(.*)$/.exec(fullpath);
+  if(!split) throw Error("No path specified in " + pattern);
+  var host = split[1];
+  var path = split[2];
+
+  // File 
+  if(schema == "file" && host != "")
+    throw Error("Non-empty host for file schema in " + pattern);
+
+  if(schema != "file" && host == "")
+    throw Error("No host specified in " + pattern);  
+
+  if(!(/^(\*|\*\.[^*]+|[^*]*)$/.exec(host)))
+    throw Error("Illegal wildcard in host in " + pattern);
+
+  var reString = "^";
+  reString += (schema == "*") ? "https*" : schema;
+  reString += ":\\/\\/";
+  // Not overly concerned with intricacies
+  //   of domain name restrictions and IDN
+  //   as we're not testing domain validity
+  reString += host.replace(/\*\.?/, "[^\\/]*");
+  reString += "\\/";
+  reString += path.replace("*", ".*");
+  reString += "$";
+
+  return RegExp(reString);
 }

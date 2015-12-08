@@ -14,7 +14,7 @@
 	"background": {
 		"scripts":["background.js"]
 	},
-	"permissions": ["chrome://favicon/", "storage"],
+	"permissions": ["chrome://favicon/", "storage","tabs"],
 	"options_page": "options.html",
 	"icons":{"128":"pageage_128.png"},
 

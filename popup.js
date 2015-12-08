@@ -4,7 +4,7 @@ $(document).ready(function(){
 	//get the state from background
 	chrome.runtime.sendMessage({message: "popup-load"},function(data,page){
 		
-		updateState(data,page);
+		updateState(data.selection,data.p);
 
 		$("input:radio").change(function(){
 			checkChange();
@@ -26,18 +26,20 @@ function checkChange(){
 	//change bar text
 	var val = $("input[name='state']:checked").val();
 	//Send message to background
-	chrome.runtime.sendMessage({message: "popup-select",state:val},function(data,page){
+	chrome.runtime.sendMessage({message: "popup-select",state:val},function(data){
 		//do the thing
-		updateState(data,page);
+		updateState(data.selection,data.p);
 	});
 }
 
 function updateState(state, pageFlag){
 	pflag = pageFlag;
+	console.log(pflag);
 	$("#undospan").show();
 	if (pageFlag){ //if the page is techincally found in the list of excepted stuff...
 		//show that the current page is in the disabled list
 		//dotted background or something. I dunno.
+		console.log(pflag);
 	}
 	$("#denabled").removeClass("checked");
 	$("#dtemp").removeClass("checked");

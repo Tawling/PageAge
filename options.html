@@ -9,23 +9,37 @@
 	</head>
 	<body>
 		<div id="header"><p>PageAge</p></div>
-		<div id="side_bar">
-			<div class="top_text">
-			<button type="button" id="add">Add Entry</button> <button type="button" id="save">Save</button>
+		<div id="content">
+			<div id="filterdiv">
+				URL Filters:
+				<ul id="filters">
+					<li><label>Butts</label></li>
+					<li><label>More butts</label></li>
+					<li><label>butts.com</label></li>
+				</ul>
+				<input type="text" id="filtertxt" /> <button type="button" id="addfilter">Add URL Filter</button> (example: <span class="mono">*.google.com/*</span> )<br />
+				<button type="button" id="delfilter">Delete Selected Filter</button>
+			</div>
 			<br />
-			Click colors to edit
+			<hr />
 			<br />
+			<div id="side_bar">
+				<div class="top_text">
+					<button type="button" id="add">Add Entry</button> <button type="button" id="save">Save</button>
+					<br />
+					Click colors to edit
+					<br />
+				</div>
+			</div>
+			<ul id="entries">
+			</ul>
+			<div id="picker">
+				<input id="red" type="range" min="0" max="255" /> R: <span id="redspan">0</span><br />
+				<input id="green" type="range" min="0" max="255" /> G: <span id="greenspan">0</span><br />
+				<input id="blue" type="range" min="0" max="255" /> B: <span id="bluespan">0</span><br />
+				<input id="alpha" type="range" min="0" max="1" step="0.01"/> A: <span id="alphaspan">0</span><br />
 			</div>
 		</div>
-		<ul id="entries">
-		</ul>
-		<div id="picker">
-			<input id="red" type="range" min="0" max="255" /> R: <span id="redspan">0</span><br />
-			<input id="green" type="range" min="0" max="255" /> G: <span id="greenspan">0</span><br />
-			<input id="blue" type="range" min="0" max="255" /> B: <span id="bluespan">0</span><br />
-			<input id="alpha" type="range" min="0" max="1" step="0.01"/> A: <span id="alphaspan">0</span><br />
-		</div>
-
 		<script src="options.js"></script>
 	</body>
 </html>

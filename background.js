@@ -7,6 +7,7 @@ var default_entries = [
 
 function getFavicon(request, sender, callback) {
 	var time = Date.now() - request.startTime;
+	var err = false;
 	chrome.storage.sync.get({
 		entries: default_entries
 	}, function(items) {
@@ -126,47 +127,51 @@ chrome.runtime.onMessage.addListener(function(request, sender, callback){
 	if (request.message === "icon"){
 		getFavicon(request,sender,callback);
 	}else if (request.message === "load"){
-		getTabState(sender.tab, function(state){
+		getTabState(sender.tab, function(state, pageFlag){
 			console.log("load state: " + state);
-			if (state === "enabled" || state === "temp"){
+			if ((state === "enabled" || state === "temp") && !pageFlag){
 				sessionStorage.setItem("PageAge+"+sender.tab.id,"enabled");
 				callback(true);
+			}else if (pageFlag){
+				sessionStorage.setItem("PageAge+"+sender.tab.id,"page");
 			}
 		})
 	}else if (request.message === "popup-select") {
 		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 		    var tab = tabs[0];
 		    var newstate = request.state;
-			getTabState(tab, function(state){
+			getTabState(tab, function(state,pageFlag){
 				if (state === "page"){
-					callback(true);
+					//callback("page",pageFlag);
+					pageFlag = true;
 				}
+				console.log("pageflag="+pageFlag);
 				switch(newstate){
 					case "enabled":
 						chrome.tabs.sendMessage(tab.id,{message:"enable"},function(){console.log("enabled");});
-						if (state ==="page"){
+						if (state ==="page" || pageFlag){
 							//ONLY ENABLE TEMPORARILY
 							sessionStorage.setItem("PageAge+"+tab.id,"enabled-temp");
-							callback("enabled-temp")
+							callback({selection: "enabled-temp", p: pageFlag})
 						}
 						else {
 							sessionStorage.setItem("PageAge+"+tab.id,"enabled");
-							callback("enabled");
+							callback({selection: "enabled", p: pageFlag});
 						}
 						break;
 					case "temp":
 						sessionStorage.setItem("PageAge+"+tab.id,"temp");
 						chrome.tabs.sendMessage(tab.id,{message:"disable"},function(){console.log("temp disabled");});
-						callback("temp");
+						callback({selection: "temp", p: pageFlag});
 						break;
 					case "tab":
 						sessionStorage.setItem("PageAge+"+tab.id,"tab");
 						chrome.tabs.sendMessage(tab.id,{message:"disable"},function(){console.log("tab disabled");});
-						callback("tab");
+						callback({selection: "tab", p: pageFlag});
 						break;
 					case "page":
 						chrome.tabs.sendMessage(tab.id,{message:"disable"},function(){console.log("pagedisabled");});
-						callback("page");
+						callback({selection: "page", p: pageFlag});
 						break;
 				}
 			})
@@ -175,8 +180,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, callback){
 	else if(request.message === "popup-load"){
 		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 		    var tab = tabs[0];
-			getTabState(tab, function(state){
-				callback(state);
+		    console.log(tab.url);
+			getTabState(tab, function(state,pageFlag){
+				callback({selection: state, p: pageFlag});
 			});
 		});
 	}
@@ -213,9 +219,11 @@ function getTabState(tab, callback){
 					re = patternToRegExp(pat);
 					if (re.test(tab.url)){
 						if (ss === "tab" || ss === "temp" || ss === "enabled-temp"){
+							console.log("SS PAGE");
 							callback(ss,"page")
 						}else{
-							callback("page");
+							console.log("PAGE PAGE");
+							callback("page","page");
 						}
 						return;
 					}
@@ -226,9 +234,16 @@ function getTabState(tab, callback){
 			}
 		}
 		if (ss === "temp" || ss === "tab" || ss === "enabled" || ss === "enabled-temp"){
-			callback(ss);
+			if (ss === "enabled-temp"){
+				console.log("ETEMP");
+				callback(ss,"page");
+			}else{
+				console.log("DEFAULT SS");
+				callback(ss);
+			}
 			return;
 		}
+		console.log("DEFAULT");
 		callback("enabled");
 	})
 }
