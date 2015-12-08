@@ -14,10 +14,14 @@
 				width: 360px; margin: 0px;
 				font-family: "Trebuchet MS","Futura","Tahoma","Century Gothic",sans-serif;
 				font-size: 10pt;
+				padding: 0px;
+				margin: 0px;
+				background-color: #3d668f;
+				color: white;
 			}
 
 			#statusbar {
-				background-color: #888888;
+				background-color: #16439c;
 				color: white;
 				padding-left: 5px;
 				padding-bottom: 5px;
@@ -29,7 +33,7 @@
 			}
 
 			label {
-				display: inline-block;
+				display: block;
 				padding: 5px;
 			}
 
@@ -64,6 +68,7 @@
 
 			a {
 				color: white;
+				font-size: 9pt;
 			}
 
 			a:active {
@@ -71,7 +76,21 @@
 			}
 
 			#settings {
+				position: relative;
+				top: -3px;
 				float: right;
+			}
+
+			.toggle {
+
+			}
+
+			.checked {
+				background-color: #6199d1;
+			}
+
+			#filters {
+				padding-left: 30px;
 			}
 		</style>
 	</head>
@@ -80,21 +99,28 @@
     <path d="M0 0h24v24H0z" fill="none"/>
     <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
 </svg></div><span id="statustext">PageAge is enabled</span><span> <span id="undospan">(<a href="javascript:void()" id="undo">undo</a>)</span></span></div>
-
-		<input type="radio" id="renabled" name="state" value="enabled"/>
-		<label for="renabled" class="unselectable"><span></span>Enabled</label><br />
-
-		<input type="radio" id="rtemp" name="state" value="temp"/>
-		<label for="rtemp" class="unselectable"><span></span>Disabled for this page instance (temporary)</label><br />
-
-		<input type="radio" id="rtab" name="state" value="tab"/>
-		<label for="rtab" class="unselectable"><span></span>Disabled for this tab</label><br />
-
+		
+		<div id="denabled" class="toggle">
+			<input type="radio" id="renabled" name="state" value="enabled"/>
+			<label for="renabled" class="unselectable"><span></span>Enabled</label>
+		</div>
+		<div id="dtemp" class="toggle">
+			<input type="radio" id="rtemp" name="state" value="temp"/>
+			<label for="rtemp" class="unselectable"><span></span>Disabled for this page instance (temporary)</label>
+		</div>
+		<div id="dtab" class="toggle">
+			<input type="radio" id="rtab" name="state" value="tab"/>
+			<label for="rtab" class="unselectable"><span></span>Disabled for this tab</label>
+		</div>
 		<hr />
-
-		<input type="radio" id="rpage" name="state" value="page"/>
-		<label for="rpage" class="unselectable"><span></span>Disabled for this site</label><br />
-
+		<div id="dpage">
+			<input type="radio" id="rpage" name="state" value="page"/>
+			<label for="rpage" class="unselectable"><span></span>Disabled for this site</label>
+			<div id="filters">
+				<a href="javascript:void()" class="tiny" id="undo">Add filter for this page</a><br />
+				<a href="javascript:void()" class="tiny" id="undo">Manage filters</a><br />
+			</div>
+		</div>
 		<script src="popup.js"></script>
 	</body>
 </html>

@@ -47,7 +47,7 @@
 			"file": "popup.html",
 			"settings":
 			{
-				"buffer_size": 2180,
+				"buffer_size": 3166,
 				"line_ending": "Windows"
 			}
 		},
@@ -55,7 +55,7 @@
 			"file": "popup.js",
 			"settings":
 			{
-				"buffer_size": 1160,
+				"buffer_size": 2003,
 				"line_ending": "Windows",
 				"name": "popup.js"
 			}
@@ -64,7 +64,7 @@
 			"file": "content.js",
 			"settings":
 			{
-				"buffer_size": 1344,
+				"buffer_size": 1363,
 				"line_ending": "Windows"
 			}
 		},
@@ -72,7 +72,7 @@
 			"file": "background.js",
 			"settings":
 			{
-				"buffer_size": 4385,
+				"buffer_size": 8166,
 				"line_ending": "Windows"
 			}
 		},
@@ -80,7 +80,7 @@
 			"file": "options.html",
 			"settings":
 			{
-				"buffer_size": 2318,
+				"buffer_size": 849,
 				"line_ending": "Windows"
 			}
 		},
@@ -88,7 +88,15 @@
 			"file": "options.js",
 			"settings":
 			{
-				"buffer_size": 5283,
+				"buffer_size": 5630,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "css.css",
+			"settings":
+			{
+				"buffer_size": 1501,
 				"line_ending": "Windows"
 			}
 		}
@@ -125,6 +133,8 @@
 	},
 	"file_history":
 	[
+		"/C/Users/Taw/AppData/Roaming/Sublime Text 2/Packages/Default/Default (Windows).sublime-keymap",
+		"/C/Users/Taw/AppData/Roaming/Sublime Text 2/Packages/User/Default (Windows).sublime-keymap",
 		"/C/Users/Taw/Chrome Extensions/TextExtension/manifest.json",
 		"/C/Users/Taw/Chrome Extensions/TextExtension/options.js",
 		"/C/Users/Taw/Chrome Extensions/TextExtension/options.html",
@@ -150,7 +160,6 @@
 		"/C/Users/Taw/TwitchBot-IRCv3/term2.js",
 		"/C/Users/Taw/TwitchBot-IRCv3/variables.js",
 		"/C/Users/Taw/TwitchBot-IRCv3/reload.js",
-		"/C/Users/Taw/AppData/Roaming/Sublime Text 2/Packages/Default/Default (Windows).sublime-keymap",
 		"/C/Users/Taw/AppData/Roaming/Sublime Text 2/Packages/User/Preferences.sublime-settings",
 		"/C/Users/Taw/AppData/Roaming/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
 		"/C/Users/Taw/AppData/Roaming/Sublime Text 2/Packages/User/JavaScript.sublime-settings",
@@ -172,6 +181,10 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"next_view",
+			"next_view_in_stack",
+			"mouse",
+			");\n",
 			"}\n",
 			"flex",
 			"5000",
@@ -291,15 +304,15 @@
 					"file": "popup.html",
 					"settings":
 					{
-						"buffer_size": 2180,
+						"buffer_size": 3166,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2172,
-								2172
+								414,
+								414
 							]
 						],
 						"settings":
@@ -318,24 +331,25 @@
 					"file": "popup.js",
 					"settings":
 					{
-						"buffer_size": 1160,
+						"buffer_size": 2003,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								79,
-								79
+								251,
+								251
 							]
 						],
 						"settings":
 						{
 							"auto_name": "popup.js",
-							"syntax": "Packages/JavaScript Ultimate/JavaScript.tmLanguage"
+							"syntax": "Packages/JavaScript Ultimate/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 66.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -345,15 +359,15 @@
 					"file": "content.js",
 					"settings":
 					{
-						"buffer_size": 1344,
+						"buffer_size": 1363,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								849,
-								771
+								1363,
+								1363
 							]
 						],
 						"settings":
@@ -362,7 +376,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 1034.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -372,15 +386,15 @@
 					"file": "background.js",
 					"settings":
 					{
-						"buffer_size": 4385,
+						"buffer_size": 8166,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3904,
-								3904
+								5707,
+								5707
 							]
 						],
 						"settings":
@@ -389,7 +403,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 2266.0,
+						"translation.y": 2706.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -399,7 +413,7 @@
 					"file": "options.html",
 					"settings":
 					{
-						"buffer_size": 2318,
+						"buffer_size": 849,
 						"regions":
 						{
 						},
@@ -426,20 +440,47 @@
 					"file": "options.js",
 					"settings":
 					{
-						"buffer_size": 5283,
+						"buffer_size": 5630,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								5514,
+								5514
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/JavaScript Ultimate/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 3564.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "css.css",
+					"settings":
+					{
+						"buffer_size": 1501,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								36,
+								36
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CSS/CSS.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
