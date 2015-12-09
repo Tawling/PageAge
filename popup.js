@@ -2,7 +2,7 @@ var pflag = false;
 
 $(document).ready(function(){
 	//get the state from background
-	chrome.runtime.sendMessage({message: "popup-load"},function(data,page){
+	chrome.runtime.sendMessage({message: "popup-load"},function(data){
 		
 		updateState(data.selection,data.p);
 
@@ -22,6 +22,22 @@ $("#undo").click(function(){
 	checkChange();
 });
 
+$("#addfilter").click(function(){
+		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+		    var tab = tabs[0];
+		    console.log(tab);
+		    var url = "*://"+tab.url.split("://")[1].split("/")[0] + "/*";
+		    console.log(url)
+		    chrome.runtime.sendMessage({message:"filter-add",filter:url},function(data){
+		    	console.log("added or something: "+ data)
+		    	$("#addfilter").hide();
+		    	chrome.runtime.sendMessage({message: "popup-load"},function(data){
+					updateState(data.selection,data.p);
+				});
+		    });
+		});
+});
+
 function checkChange(){
 	//change bar text
 	var val = $("input[name='state']:checked").val();
@@ -34,12 +50,15 @@ function checkChange(){
 
 function updateState(state, pageFlag){
 	pflag = pageFlag;
-	console.log(pflag);
 	$("#undospan").show();
 	if (pageFlag){ //if the page is techincally found in the list of excepted stuff...
 		//show that the current page is in the disabled list
 		//dotted background or something. I dunno.
-		console.log(pflag);
+	}
+	if (pflag){
+		$("#addfilter").hide();
+	}else{
+		$("#addfilter").show();
 	}
 	$("#denabled").removeClass("checked");
 	$("#dtemp").removeClass("checked");

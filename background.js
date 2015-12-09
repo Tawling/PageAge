@@ -190,8 +190,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, callback){
 		chrome.storage.sync.get({
 			exceptions: []
 		},function(items){
-			if (items.exceptions.indexOf(message.filter) === -1) {
-				items.exceptions.push(message.filter);
+			console.log("adding filter: " +request.filter);
+			if (items.exceptions.indexOf(request.filter) === -1) {
+				items.exceptions.push(request.filter);
 				chrome.storage.sync.set({
 					exceptions:items.exceptions
 				},function(){
