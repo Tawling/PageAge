@@ -1,9 +1,11 @@
 var default_entries = [
-	{stroke: {r:0, g:0, b:0, a:1}, fill: {r:0, g:0, b:0, a:1}, d: 0, h: 0, m: 0, s: 5},
-	{stroke: {r:255, g:0, b:0, a:1}, fill: {r:255, g:0, b:0, a:1}, d: 0, h: 0, m: 0, s: 10},
-	{stroke: {r:0, g:0, b:255, a:1}, fill: {r:0, g:0, b:255, a:1}, d: 0, h: 0, m: 0, s: 30},
-	{stroke: {r:0, g:0, b:255, a:0}, fill: {r:0, g:0, b:255, a:1}, d: 0, h: 0, m: 5, s: 0}
-];
+		{"d":0,"fill":{"a":0,"b":0,"g":0,"r":0},"h":0,"m":0,"s":0,"stroke":{"a":0,"b":0,"g":255,"r":0}},
+		{"d":0,"fill":{"a":0,"b":0,"g":0,"r":255},"h":1,"m":0,"s":0,"stroke":{"a":1,"b":0,"g":255,"r":0}},
+		{"d":0,"fill":{"a":0,"b":255,"g":0,"r":0},"h":11,"m":0,"s":0,"stroke":{"a":1,"b":255,"g":255,"r":0}},
+		{"d":0,"fill":{"a":0,"b":255,"g":0,"r":0},"h":12,"m":0,"s":0,"stroke":{"a":1,"b":255,"g":0,"r":0}},
+		{"d":6,"fill":{"a":0,"b":0,"g":0,"r":255},"h":0,"m":0,"s":0,"stroke":{"a":1,"b":0,"g":0,"r":255}},
+		{"d":7,"fill":{"a":1,"b":0,"g":0,"r":255},"h":0,"m":0,"s":0,"stroke":{"a":1,"b":0,"g":0,"r":255}}
+	];
 
 function getFavicon(request, sender, callback) {
 	var time = Date.now() - request.startTime;
@@ -190,9 +192,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, callback){
 		chrome.storage.sync.get({
 			exceptions: []
 		},function(items){
-			console.log("adding filter: " +request.filter);
+			console.log("adding filter: " + request.filter)
 			if (items.exceptions.indexOf(request.filter) === -1) {
-				items.exceptions.push(request.filter);
+				items.exceptions.push(processFilter(request.filter));
 				chrome.storage.sync.set({
 					exceptions:items.exceptions
 				},function(){
@@ -206,19 +208,16 @@ chrome.runtime.onMessage.addListener(function(request, sender, callback){
 	return true;
 });
 
-
-
 function getTabState(tab, callback){
 	chrome.storage.sync.get({
 		exceptions: []
 	},function(items){
 		var ss = tab.id ? sessionStorage.getItem("PageAge+"+tab.id) : null;
 		if (tab.url){
-			var re, pat;
-			for(pat of items.exceptions){
+			var filter;
+			for(filter of items.exceptions){
 				try{
-					re = patternToRegExp(pat);
-					if (re.test(tab.url)){
+					if (matchFilter(filter,tab.url)){
 						if (ss === "tab" || ss === "temp" || ss === "enabled-temp"){
 							console.log("SS PAGE");
 							callback(ss,"page")
@@ -249,40 +248,123 @@ function getTabState(tab, callback){
 	})
 }
 
+function processFilter(input){
+	filter = splitFilter(input);
+	filter[1] = cleanDomain(filter[1]);
+	filter[2] = cleanDir(filter[2]);
+	//var display = filter[0]+"://"+filter[1].display+"/"+filter[2].display+"?"+filter[3].join("&");
+	filter = filterToRegex(filter);
+	//filter.display = display;
+	return filter;
+}
 
-function patternToRegExp(pattern){
-  if(pattern == "<all_urls>") return /^(?:http|https|file|ftp):\/\/.*/;
+function matchFilter(filter, url){
+	var q = url.split(/[\?\&]/g);
+  //console.log(q);
+	if (new RegExp(filter.re,"i").test(q[0])){
+  	for(var query of filter.q){
+    	var matches = false;
+      for(var i = 1; !matches && i < q.length; i++){
+      	matches = new RegExp(query).test(q[i])
+        //console.log(query + "  :  " + q[i] + "    " + matches);
+      }
+      if (!matches) return false;
+    }
+    return true;
+  }
+  return false;
+}
 
-  var split = /^(\*|http|https|file|ftp):\/\/(.*)$/.exec(pattern);
-  if(!split) throw Error("Invalid schema in " + pattern);
-  var schema = split[1];
-  var fullpath = split[2];
+function filterToRegex(filter){
+	//create expression and add scheme
+  var re = "^" + filter[0].replace("*","[\\-\\.\\+\\w]*") + ":(?:\\/\\/)?";
+  //add domain
+  if (filter[1].addwww){
+  	re += "(?:www\\.)?";
+  }
+  re += filter[1].domain.replace(".*.","\uFFFD").replace(".*","\uFFFE").replace("*.","\uFFFF").replace("*","[\\-\\w]*").replace("\uFFFD","(?:\\.(?:[\\-\\w]+\\.)+)?").replace("\uFFFE","(?:\\.[\\-\\w]+)*").replace("\uFFFF","(?:[\\-\\w]+\\.)*") + "\\/";
+  //add path
+  re += filter[2].dir.replace(/([\(\)\[\]\{\}\^\$\|\?\+\.\<\>\-\=\!])/g,"\\$1").replace("/*/","\uFFFD").replace("/*","\uFFFE").replace("*/","\uFFFF").replace("*","[^\\/\\?\\&]*").replace("\uFFFD","(?:\\/(?:[^\\/\\?\\&]+\\/)+)?").replace("\uFFFE","(?:\\/[^\\/\\?\\&]+)*").replace("\uFFFF","(?:[^\\/\\?\\&]+\\/)*");
+  if (filter[2].addwc){
+  	re += "(?:\\/[^\\/\\?\\&]+)*";
+  }
+  re += "\\/?$"
+  var queries = [];
+  for(var q of filter[3]){
+  	queries.push("^"+q.replace(/([\(\)\[\]\{\}\^\$\|\?\+\.\<\>\-\=\!])/g,"\\$1").replace("*","[^\\&\\?]*")+"$");
+  }
+  return {re:re ,q: queries, display: filter[0]+"://"+filter[1].display+"/"+filter[2].display+(filter[3].length ?"?"+filter[3].join("&") : "")};
+}
 
-  var split = /^([^\/]*)\/(.*)$/.exec(fullpath);
-  if(!split) throw Error("No path specified in " + pattern);
-  var host = split[1];
-  var path = split[2];
+function cleanDomain(domain){
+	if (domain[0] === "."){
+  	domain = "*" + domain;
+  }
+  if (domain[domain.length-1] === "."){
+  	domain += "*";
+  }
+  if (domain.split(".")[0] !== "*"){
+  	domain = domain.split(".");
+    if (domain[0] === "www") {
+      domain.shift();
+    }
+    domain = domain.join(".");
+    return {domain: domain === "*" ? "*.*" : domain, display: "(www.)"+domain, addwww: true}
+  }
+  return {domain: domain === "*" ? "*.*" : domain, display: domain, addwww: false};
+}
 
-  // File 
-  if(schema == "file" && host != "")
-    throw Error("Non-empty host for file schema in " + pattern);
+function cleanDir(dir){
+	var split = (" "+dir+" ").split("/");
+  var last = split.length-1;
+  split[0] = split[0].trim();
+  split[last] = split[last].trim();
+  if (split[last] && split[last] !== "*"){
+  	return {dir: split.join("/"),addwc: true, display: split.join("/")+"(/*)"}
+  }
+	return {dir: split.join("/"), addwc: false, display: split.join("/")};
+}
 
-  if(schema != "file" && host == "")
-    throw Error("No host specified in " + pattern);  
+function splitFilter(input){
+	var scheme = "*";
+	var domain = "*";
+	var dir = "*";
+	var query = [];
+	var unprocessed = input;
+  
+  if (unprocessed[0]=== "?" || unprocessed[0] === "&"){
+  	unprocessed = "*://*/*"+unprocessed;
+  }
 
-  if(!(/^(\*|\*\.[^*]+|[^*]*)$/.exec(host)))
-    throw Error("Illegal wildcard in host in " + pattern);
+	var s1 = unprocessed.split(/:(?:\/\/)?/);
+	if (s1.length > 1){
+		scheme = s1[0];
+		unprocessed = s1[1];
+	}
+	//var s2 = unprocessed.split("/");
+	var s2 = [unprocessed.substring(0,unprocessed.indexOf("/") > -1 ? unprocessed.indexOf("/") : unprocessed.length), unprocessed.indexOf("/") > -1 ? unprocessed.substring(unprocessed.indexOf("/")+1) : undefined];
+	if (s2[1] === undefined) s2.pop();
+	domain = s2[0] ? s2[0] : "*";
+	if (s2.length > 1) {
+		unprocessed = s2[1];
+		if (unprocessed.indexOf("?") > -1){
+			var s3 = [unprocessed.substring(0,unprocessed.indexOf("?") > -1 ? unprocessed.indexOf("?") : unprocessed.length), unprocessed.indexOf("?") > -1 ? unprocessed.substring(unprocessed.indexOf("?")+1) : undefined];
+    }else if(unprocessed.indexOf("&")){
+    	var s3 = [unprocessed.substring(0,unprocessed.indexOf("&") > -1 ? unprocessed.indexOf("&") : unprocessed.length), unprocessed.indexOf("&") > -1 ? unprocessed.substring(unprocessed.indexOf("&")+1) : undefined];
+    }
+		if (!s3[1]) s3.pop();
+		dir = s3[0];
+		if (s3.length > 1) {	//if there is no query, try using & instead of ?
+			query = s3[1];
+			query = query.split("&");
+		}
+	}
 
-  var reString = "^";
-  reString += (schema == "*") ? "https*" : schema;
-  reString += ":\\/\\/";
-  // Not overly concerned with intricacies
-  //   of domain name restrictions and IDN
-  //   as we're not testing domain validity
-  reString += host.replace(/\*\.?/, "[^\\/]*");
-  reString += "\\/";
-  reString += path.replace("*", ".*");
-  reString += "$";
 
-  return RegExp(reString);
+
+	//console.log("scheme = " + scheme);
+	//console.log("domain = " + domain);
+	//console.log("dir = " + dir);
+	//console.log("query = " + query);
+	return [scheme,domain,dir,query];
 }

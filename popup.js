@@ -26,7 +26,7 @@ $("#addfilter").click(function(){
 		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 		    var tab = tabs[0];
 		    console.log(tab);
-		    var url = "*://"+tab.url.split("://")[1].split("/")[0] + "/*";
+		    var url = tab.url.split("://")[1].split("/")[0];
 		    console.log(url)
 		    chrome.runtime.sendMessage({message:"filter-add",filter:url},function(data){
 		    	console.log("added or something: "+ data)

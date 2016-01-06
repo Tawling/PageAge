@@ -190,11 +190,19 @@ $(document).ready(function(){
 
 function restore_options(){
 	chrome.storage.sync.get({entries: [
+		{"d":0,"fill":{"a":0,"b":0,"g":0,"r":0},"h":0,"m":0,"s":0,"stroke":{"a":0,"b":0,"g":255,"r":0}},
+		{"d":0,"fill":{"a":0,"b":0,"g":0,"r":255},"h":1,"m":0,"s":0,"stroke":{"a":1,"b":0,"g":255,"r":0}},
+		{"d":0,"fill":{"a":0,"b":255,"g":0,"r":0},"h":11,"m":0,"s":0,"stroke":{"a":1,"b":255,"g":255,"r":0}},
+		{"d":0,"fill":{"a":0,"b":255,"g":0,"r":0},"h":12,"m":0,"s":0,"stroke":{"a":1,"b":255,"g":0,"r":0}},
+		{"d":6,"fill":{"a":0,"b":0,"g":0,"r":255},"h":0,"m":0,"s":0,"stroke":{"a":1,"b":0,"g":0,"r":255}},
+		{"d":7,"fill":{"a":1,"b":0,"g":0,"r":255},"h":0,"m":0,"s":0,"stroke":{"a":1,"b":0,"g":0,"r":255}}
+		]	
+		/*[
 		{stroke: {r:0, g:0, b:0, a:1}, fill: {r:0, g:0, b:0, a:1}, d: 0, h: 0, m: 0, s: 5},
 		{stroke: {r:255, g:0, b:0, a:1}, fill: {r:255, g:0, b:0, a:1}, d: 0, h: 0, m: 0, s: 10},
 		{stroke: {r:0, g:0, b:255, a:1}, fill: {r:0, g:0, b:255, a:1}, d: 0, h: 0, m: 0, s: 30},
 		{stroke: {r:0, g:0, b:255, a:0}, fill: {r:0, g:0, b:255, a:0}, d: 0, h: 0, m: 5, s: 0}
-	]}, function(items){
+	]*/}, function(items){
 		for(var i = 0; i < items.entries.length; i++){
 			var e = addEntry(items.entries[i]);
 			target = $(e).find(".fill");
@@ -251,7 +259,7 @@ function addFilter(filter,callback){
 		exceptions: []
 	},function(items){
 		if (items.exceptions.indexOf(filter) === -1) {
-			items.exceptions.push(filter);
+			items.exceptions.push(processFilter(filter));
 			chrome.storage.sync.set({
 				exceptions:items.exceptions
 			},function(){
@@ -269,16 +277,18 @@ function deleteFilter(filter,callback){
 	chrome.storage.sync.get({
 		exceptions: []
 	},function(items){
-		if (items.exceptions.indexOf(filter) > -1) {
-			items.exceptions.splice(items.exceptions.indexOf(filter),1);
-			chrome.storage.sync.set({
-				exceptions:items.exceptions
-			},function(){
-				callback(true);
-			});
-		}else {
-			callback(false);
+		for(var i = 0; i < items.exceptions.length; i++){
+			if (items.exceptions[i].display === filter){
+				items.exceptions.splice(i,1);
+				chrome.storage.sync.set({
+					exceptions:items.exceptions
+				},function(){
+					callback(true);
+				});
+				return;
+			}
 		}
+		callback(false);
 	});
 }
 
@@ -293,45 +303,129 @@ function refreshFilters(){
 				$("#filters li").removeClass("selected");
 				$(this).addClass("selected");
 			});
-			$(li).append("<label>"+i+"</label>");
+			$(li).append("<label>"+i.display+"</label>");
 			$("#filters").append(li);
 		}
 	});
 }
 
-function patternToRegExp(pattern){
-  if(pattern == "<all_urls>") return /^(?:http|https|file|ftp):\/\/.*/;
+function processFilter(input){
+	filter = splitFilter(input);
+	filter[1] = cleanDomain(filter[1]);
+	filter[2] = cleanDir(filter[2]);
+	//var display = filter[0]+"://"+filter[1].display+"/"+filter[2].display+"?"+filter[3].join("&");
+	filter = filterToRegex(filter);
+	//filter.display = display;
+	return filter;
+}
 
-  var split = /^(\*|http|https|file|ftp):\/\/(.*)$/.exec(pattern);
-  if(!split) throw Error("Invalid schema in " + pattern);
-  var schema = split[1];
-  var fullpath = split[2];
+function matchFilter(filter, url){
+	var q = url.split(/[\?\&]/g);
+  //console.log(q);
+	if (new RegExp(filter.re,"i").test(q[0])){
+  	for(var query of filter.q){
+    	var matches = false;
+      for(var i = 1; !matches && i < q.length; i++){
+      	matches = new RegExp(query).test(q[i])
+        //console.log(query + "  :  " + q[i] + "    " + matches);
+      }
+      if (!matches) return false;
+    }
+    return true;
+  }
+  return false;
+}
 
-  var split = /^([^\/]*)\/(.*)$/.exec(fullpath);
-  if(!split) throw Error("No path specified in " + pattern);
-  var host = split[1];
-  var path = split[2];
+function filterToRegex(filter){
+	//create expression and add scheme
+  var re = "^" + filter[0].replace("*","[\\-\\.\\+\\w]*") + ":(?:\\/\\/)?";
+  //add domain
+  if (filter[1].addwww){
+  	re += "(?:www\\.)?";
+  }
+  re += filter[1].domain.replace(".*.","\uFFFD").replace(".*","\uFFFE").replace("*.","\uFFFF").replace("*","[\\-\\w]*").replace("\uFFFD","(?:\\.(?:[\\-\\w]+\\.)+)?").replace("\uFFFE","(?:\\.[\\-\\w]+)*").replace("\uFFFF","(?:[\\-\\w]+\\.)*") + "\\/";
+  //add path
+  re += filter[2].dir.replace(/([\(\)\[\]\{\}\^\$\|\?\+\.\<\>\-\=\!])/g,"\\$1").replace("/*/","\uFFFD").replace("/*","\uFFFE").replace("*/","\uFFFF").replace("*","[^\\/\\?\\&]*").replace("\uFFFD","(?:\\/(?:[^\\/\\?\\&]+\\/)+)?").replace("\uFFFE","(?:\\/[^\\/\\?\\&]+)*").replace("\uFFFF","(?:[^\\/\\?\\&]+\\/)*");
+  if (filter[2].addwc){
+  	re += "(?:\\/[^\\/\\?\\&]+)*";
+  }
+  re += "\\/?$"
+  var queries = [];
+  for(var q of filter[3]){
+  	queries.push("^"+q.replace(/([\(\)\[\]\{\}\^\$\|\?\+\.\<\>\-\=\!])/g,"\\$1").replace("*","[^\\&\\?]*")+"$");
+  }
+  return {re:re,q: queries, display: filter[0]+"://"+filter[1].display+"/"+filter[2].display+(filter[3].length ?"?"+filter[3].join("&") : "")};
+}
 
-  // File 
-  if(schema == "file" && host != "")
-    throw Error("Non-empty host for file schema in " + pattern);
+function cleanDomain(domain){
+	if (domain[0] === "."){
+  	domain = "*" + domain;
+  }
+  if (domain[domain.length-1] === "."){
+  	domain += "*";
+  }
+  if (domain.split(".")[0] !== "*"){
+  	domain = domain.split(".");
+    if (domain[0] === "www") {
+      domain.shift();
+    }
+    domain = domain.join(".");
+    return {domain: domain === "*" ? "*.*" : domain, display: "(www.)"+domain, addwww: true}
+  }
+  return {domain: domain === "*" ? "*.*" : domain, display: domain, addwww: false};
+}
 
-  if(schema != "file" && host == "")
-    throw Error("No host specified in " + pattern);  
+function cleanDir(dir){
+	var split = (" "+dir+" ").split("/");
+  var last = split.length-1;
+  split[0] = split[0].trim();
+  split[last] = split[last].trim();
+  if (split[last] && split[last] !== "*"){
+  	return {dir: split.join("/"),addwc: true, display: split.join("/")+"(/*)"}
+  }
+	return {dir: split.join("/"), addwc: false, display: split.join("/")};
+}
 
-  if(!(/^(\*|\*\.[^*]+|[^*]*)$/.exec(host)))
-    throw Error("Illegal wildcard in host in " + pattern);
+function splitFilter(input){
+	var scheme = "*";
+	var domain = "*";
+	var dir = "*";
+	var query = [];
+	var unprocessed = input;
+  
+  if (unprocessed[0]=== "?" || unprocessed[0] === "&"){
+  	unprocessed = "*://*/*"+unprocessed;
+  }
 
-  var reString = "^";
-  reString += (schema == "*") ? "https*" : schema;
-  reString += ":\\/\\/";
-  // Not overly concerned with intricacies
-  //   of domain name restrictions and IDN
-  //   as we're not testing domain validity
-  reString += host.replace(/\*\.?/, "[^\\/]*");
-  reString += "\\/";
-  reString += path.replace("*", ".*");
-  reString += "$";
+	var s1 = unprocessed.split(/:(?:\/\/)?/);
+	if (s1.length > 1){
+		scheme = s1[0];
+		unprocessed = s1[1];
+	}
+	//var s2 = unprocessed.split("/");
+	var s2 = [unprocessed.substring(0,unprocessed.indexOf("/") > -1 ? unprocessed.indexOf("/") : unprocessed.length), unprocessed.indexOf("/") > -1 ? unprocessed.substring(unprocessed.indexOf("/")+1) : undefined];
+	if (s2[1] === undefined) s2.pop();
+	domain = s2[0] ? s2[0] : "*";
+	if (s2.length > 1) {
+		unprocessed = s2[1];
+		if (unprocessed.indexOf("?") > -1){
+			var s3 = [unprocessed.substring(0,unprocessed.indexOf("?") > -1 ? unprocessed.indexOf("?") : unprocessed.length), unprocessed.indexOf("?") > -1 ? unprocessed.substring(unprocessed.indexOf("?")+1) : undefined];
+    }else if(unprocessed.indexOf("&")){
+    	var s3 = [unprocessed.substring(0,unprocessed.indexOf("&") > -1 ? unprocessed.indexOf("&") : unprocessed.length), unprocessed.indexOf("&") > -1 ? unprocessed.substring(unprocessed.indexOf("&")+1) : undefined];
+    }
+		if (!s3[1]) s3.pop();
+		dir = s3[0];
+		if (s3.length > 1) {	//if there is no query, try using & instead of ?
+			query = s3[1];
+			query = query.split("&");
+		}
+	}
 
-  return RegExp(reString);
+
+
+	//console.log("scheme = " + scheme);
+	//console.log("domain = " + domain);
+	//console.log("dir = " + dir);
+	//console.log("query = " + query);
+	return [scheme,domain,dir,query];
 }
