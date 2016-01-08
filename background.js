@@ -282,9 +282,9 @@ function filterToRegex(filter){
   if (filter[1].addwww){
   	re += "(?:www\\.)?";
   }
-  re += filter[1].domain.replace(".*.","\uFFFD").replace(".*","\uFFFE").replace("*.","\uFFFF").replace("*","[\\-\\w]*").replace("\uFFFD","(?:\\.(?:[\\-\\w]+\\.)+)?").replace("\uFFFE","(?:\\.[\\-\\w]+)*").replace("\uFFFF","(?:[\\-\\w]+\\.)*") + "\\/";
+  re += filter[1].domain.replace(".*.","\uFFFD").replace(".*","\uFFFE").replace("*.","\uFFFF").replace("*","[\\-\\w]*").replace("\uFFFD","(?:\\.(?:[\\-\\w]+\\.)+)?").replace("\uFFFE","(?:\\.[\\-\\w]+)*").replace("\uFFFF","(?:[\\-\\w]+\\.)*");
   //add path
-  re += filter[2].dir.replace(/([\(\)\[\]\{\}\^\$\|\?\+\.\<\>\-\=\!])/g,"\\$1").replace("/*/","\uFFFD").replace("/*","\uFFFE").replace("*/","\uFFFF").replace("*","[^\\/\\?\\&]*").replace("\uFFFD","(?:\\/(?:[^\\/\\?\\&]+\\/)+)?").replace("\uFFFE","(?:\\/[^\\/\\?\\&]+)*").replace("\uFFFF","(?:[^\\/\\?\\&]+\\/)*");
+  re += filter[2].dir.replace(/([\(\)\[\]\{\}\^\$\|\?\+\.\<\>\-\=\!])/g,"\\$1").replace("/*/","\uFFFD").replace("/*","\uFFFE").replace("*/","\uFFFF").replace(/\//g,"\\/").replace("*","[^\\/\\?\\&]*").replace("\uFFFD","(?:\\/(?:[^\\/\\?\\&]+\\/)+)?").replace("\uFFFE","(?:\\/[^\\/\\?\\&]+)*").replace("\uFFFF","(?:[^\\/\\?\\&]+\\/)*");
   if (filter[2].addwc){
   	re += "(?:\\/[^\\/\\?\\&]+)*";
   }
@@ -293,7 +293,7 @@ function filterToRegex(filter){
   for(var q of filter[3]){
   	queries.push("^"+q.replace(/([\(\)\[\]\{\}\^\$\|\?\+\.\<\>\-\=\!])/g,"\\$1").replace("*","[^\\&\\?]*")+"$");
   }
-  return {re:re ,q: queries, display: filter[0]+"://"+filter[1].display+"/"+filter[2].display+(filter[3].length ?"?"+filter[3].join("&") : "")};
+  return {re:re,q: queries, display: filter[0]+"://"+filter[1].display+"/"+filter[2].display+(filter[3].length ?"?"+filter[3].join("&") : "")};
 }
 
 function cleanDomain(domain){
@@ -320,9 +320,9 @@ function cleanDir(dir){
   split[0] = split[0].trim();
   split[last] = split[last].trim();
   if (split[last] && split[last] !== "*"){
-  	return {dir: split.join("/"),addwc: true, display: split.join("/")+"(/*)"}
+  	return {dir: "/" + split.join("/"),addwc: true, display: split.join("/")+"(/*)"}
   }
-	return {dir: split.join("/"), addwc: false, display: split.join("/")};
+	return {dir: "/" + split.join("/"), addwc: false, display: split.join("/")};
 }
 
 function splitFilter(input){
