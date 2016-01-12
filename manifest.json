@@ -16,7 +16,7 @@
 	},
 	"permissions": ["chrome://favicon/", "storage","tabs"],
 	"options_page": "options.html",
-	"icons":{"128":"pageage_128.png"},
+	"icons":{"128":"pageage_129.png"},
 
 	"browser_action": {
 		"default:icon": {"128":"pageage_128.png"},

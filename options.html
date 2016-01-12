@@ -5,11 +5,28 @@
 		<script src="jquery-2.1.4.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="css.css">
 		<link rel="stylesheet" href="jquery-ui-1.11.4.custom/jquery-ui.css">
+		<link rel="stylesheet" href="animate.css">
 <script src="jquery-ui-1.11.4.custom/jquery-ui.js"></script>
 	</head>
 	<body>
-		<div id="header"><p>PageAge</p></div>
-		<div id="content">
+		<div id="header"><img src="pageage_129.png" height="24px" width="24px"><p>PageAge</p></div>
+			<div id="side_bar">
+				<div class="top_text">
+					<button type="button" id="add"><b>Add Entry</button> <button type="button" id="save">Save</b></button>
+					<br />
+					<p>Click colors to edit</p>
+					<br />
+				</div>
+				<ul id="entries">
+				</ul>
+			</div>
+			<div id="picker">
+				<input id="red" type="range" min="0" max="255" /> R: <span id="redspan">0</span><br />
+				<input id="green" type="range" min="0" max="255" /> G: <span id="greenspan">0</span><br />
+				<input id="blue" type="range" min="0" max="255" /> B: <span id="bluespan">0</span><br />
+				<input id="alpha" type="range" min="0" max="1" step="0.01"/> A: <span id="alphaspan">0</span><br />
+			</div>
+			<div id="content">
 			<div id="filterdiv">
 				URL Filters:
 				<ul id="filters">
@@ -19,25 +36,6 @@
 				</ul>
 				<input type="text" id="filtertxt" /> <button type="button" id="addfilter">Add URL Filter</button> (example: <span class="mono">*.google.com/*</span> )<br />
 				<button type="button" id="delfilter">Delete Selected Filter</button>
-			</div>
-			<br />
-			<hr />
-			<br />
-			<div id="side_bar">
-				<div class="top_text">
-					<button type="button" id="add">Add Entry</button> <button type="button" id="save">Save</button>
-					<br />
-					Click colors to edit
-					<br />
-				</div>
-			</div>
-			<ul id="entries">
-			</ul>
-			<div id="picker">
-				<input id="red" type="range" min="0" max="255" /> R: <span id="redspan">0</span><br />
-				<input id="green" type="range" min="0" max="255" /> G: <span id="greenspan">0</span><br />
-				<input id="blue" type="range" min="0" max="255" /> B: <span id="bluespan">0</span><br />
-				<input id="alpha" type="range" min="0" max="1" step="0.01"/> A: <span id="alphaspan">0</span><br />
 			</div>
 		</div>
 		<script src="options.js"></script>

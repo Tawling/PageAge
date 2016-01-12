@@ -106,16 +106,16 @@ function loadColor(){
 
 function addEntry(data){
 	var entry = document.createElement("li");
-	entry.className = "entry";
+	entry.className = "entry animated zoomIn";
 	$(entry).append('<table>\
 						<tr>\
 							<td class="delbtn">X</td>\
 							<td>\
 								<div class="entry_top">\
 									<p>\
-										Fill:\
+										Stroke: \
 									</p>\
-									<div class="color fill">\
+									<div class="color stroke">\
 										<div class="alphabg"></div>\
 										<div class="incolor"></div>\
 										<input class="r" type="hidden" value="255" />\
@@ -124,9 +124,9 @@ function addEntry(data){
 										<input class="a" type="hidden" value="1" />\
 									</div>\
 									<p>\
-										Stroke: \
+										Fill:\
 									</p>\
-									<div class="color stroke">\
+									<div class="color fill">\
 										<div class="alphabg"></div>\
 										<div class="incolor"></div>\
 										<input class="r" type="hidden" value="255" />\
